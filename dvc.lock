@@ -3,66 +3,181 @@ stages:
   prepare:
     cmd: python src/prepare.py
     deps:
+    - path: data/validated/restaurants_validated.parquet
+      hash: md5
+      md5: 89df9c0a5672cf8f73e3ce6a7b8408d5
+      size: 103557236
+    - path: src/prepare.py
+      hash: md5
+      md5: a1dd326ec1069ec029b61d371fed9226
+      size: 1860
+    params:
+      params.yaml:
+        prepare.positive_rating_threshold: 4.0
+        prepare.processed_dir: data/processed
+        prepare.seed: 42
+        prepare.test_size: 0.15
+        prepare.validated_input_path: 
+          data/validated/restaurants_validated.parquet
+        prepare.validation_size: 0.15
+    outs:
+    - path: data/processed/test.parquet
+      hash: md5
+      md5: 457573670d09ce9d2c4d94c8d3214f31
+      size: 15564185
+    - path: data/processed/train.parquet
+      hash: md5
+      md5: 6605378f54de129479dc1e74eec1c2d4
+      size: 72494522
+    - path: data/processed/validation.parquet
+      hash: md5
+      md5: 2e14e3dc4fc5e326ec17eaf7912c7bfc
+      size: 15507762
+  train:
+    cmd: python src/train.py
+    deps:
+    - path: data/features/train_features.parquet
+      hash: md5
+      md5: 292b6928c5776224a0804c654dd9fde0
+      size: 2542659
+    - path: data/features/validation_features.parquet
+      hash: md5
+      md5: 003d14c9b48d66fe47ce5b5bb24fd724
+      size: 554165
+    - path: src/train.py
+      hash: md5
+      md5: 1647a7cf5235f6e3d794e0b48c576998
+      size: 3147
+    params:
+      params.yaml:
+        train.class_weight: balanced
+        train.experiment_name: Restaurant_Metadata_Ranking_Classifier
+        train.max_depth: 20
+        train.min_samples_split: 5
+        train.model_path: models/restaurant_classifier.pkl
+        train.model_type: random_forest
+        train.n_estimators: 300
+        train.run_name: experiment_3_rf_300_depth20_split5
+        train.tracking_uri: sqlite:///mlflow.db
+    outs:
+    - path: models/restaurant_classifier.pkl
+      hash: md5
+      md5: 650dfbc2de1dcaa012e4dbde3e05fa00
+      size: 195705289
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: data/features/test_features.parquet
+      hash: md5
+      md5: 40066a16c02992b64a52f820b757ef68
+      size: 553994
+    - path: models/restaurant_classifier.pkl
+      hash: md5
+      md5: 650dfbc2de1dcaa012e4dbde3e05fa00
+      size: 195705289
+    - path: src/evaluate.py
+      hash: md5
+      md5: 42fdcd22201804b1373c0a27d866916d
+      size: 3575
+    params:
+      params.yaml:
+        evaluate.classification_report_path: reports/classification_report.json
+        evaluate.confusion_matrix_path: reports/confusion_matrix.png
+        evaluate.metrics_path: metrics.json
+        evaluate.precision_recall_curve_path: reports/precision_recall_curve.png
+        evaluate.roc_curve_path: reports/roc_curve.png
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 20738ec2966b7e93ee3ab6e265f4c7bc
+      size: 370
+    - path: reports/classification_report.json
+      hash: md5
+      md5: f621173bfe3e14f603e1bf8cc7ea0cb4
+      size: 736
+    - path: reports/confusion_matrix.png
+      hash: md5
+      md5: 69e6bf8f9caf81f39f258b0ce2dc1452
+      size: 47953
+    - path: reports/precision_recall_curve.png
+      hash: md5
+      md5: c583cf6e64a552eb1bc0011147603137
+      size: 36148
+    - path: reports/roc_curve.png
+      hash: md5
+      md5: 92834fc37b907332e876849ace7729a2
+      size: 48501
+  validate_data:
+    cmd: python src/validate_data.py
+    deps:
     - path: data/raw/200k_Restaurants_Mostly_US.csv
       hash: md5
       md5: 29fe3974e57cb8e9ff928b8ddd197ee8
       size: 348339668
-    - path: src/prepare.py
+    - path: src/validate_data.py
       hash: md5
-      md5: 6ad452cc4e35ed8afbb0cc934c07210c
-      size: 3143
+      md5: 968fb7e8d7650af397e003cbc5fc8ee5
+      size: 2697
     params:
       params.yaml:
-        prepare.raw_input_path: data/raw/200k_Restaurants_Mostly_US.csv
-        prepare.seed: 42
-        prepare.test_size: 0.2
+        validate_data.latitude_column: Latitude
+        validate_data.longitude_column: Longitude
+        validate_data.max_rating: 5.0
+        validate_data.min_rating: 0.0
+        validate_data.rating_column: Rating
+        validate_data.raw_input_path: data/raw/200k_Restaurants_Mostly_US.csv
+        validate_data.validated_output_path: 
+          data/validated/restaurants_validated.parquet
+        validate_data.validation_report_path: 
+          reports/data_validation_report.json
     outs:
-    - path: data/processed/test.parquet
+    - path: data/validated/restaurants_validated.parquet
       hash: md5
-      md5: 1b03d7ea8260975a3d908c28a6412b2a
-      size: 1086689
-    - path: data/processed/train.parquet
+      md5: 89df9c0a5672cf8f73e3ce6a7b8408d5
+      size: 103557236
+    - path: reports/data_validation_report.json
       hash: md5
-      md5: d6503800fab286e12119a1ae90859107
-      size: 3972281
-  train:
-    cmd: python src/train.py
-    deps:
-    - path: data/processed/train.parquet
-      hash: md5
-      md5: d6503800fab286e12119a1ae90859107
-      size: 3972281
-    - path: src/train.py
-      hash: md5
-      md5: 9d239f24f10a19c8f5c6f63929135a80
-      size: 1453
-    params:
-      params.yaml:
-        train.max_depth: 10
-        train.model_path: models/restaurant_classifier.pkl
-        train.n_estimators: 100
-    outs:
-    - path: models/restaurant_classifier.pkl
-      hash: md5
-      md5: 4066f1df5994e2e4678e2531b748047b
-      size: 5525769
-  evaluate:
-    cmd: python src/evaluate.py
+      md5: d06731c3d6faa9bc1e6b61fdec65cee2
+      size: 735
+  feature_engineering:
+    cmd: python src/feature_engineering.py
     deps:
     - path: data/processed/test.parquet
       hash: md5
-      md5: 1b03d7ea8260975a3d908c28a6412b2a
-      size: 1086689
-    - path: models/restaurant_classifier.pkl
+      md5: 457573670d09ce9d2c4d94c8d3214f31
+      size: 15564185
+    - path: data/processed/train.parquet
       hash: md5
-      md5: 4066f1df5994e2e4678e2531b748047b
-      size: 5525769
-    - path: src/evaluate.py
+      md5: 6605378f54de129479dc1e74eec1c2d4
+      size: 72494522
+    - path: data/processed/validation.parquet
       hash: md5
-      md5: 02a5244b96de1ba0047b018f60cab07d
-      size: 1011
+      md5: 2e14e3dc4fc5e326ec17eaf7912c7bfc
+      size: 15507762
+    - path: src/feature_engineering.py
+      hash: md5
+      md5: 2a3ce5947965543cebe38203e98a65a2
+      size: 4137
+    params:
+      params.yaml:
+        feature_engineering.feature_report_path: reports/feature_summary.json
+        feature_engineering.features_dir: data/features
+        feature_engineering.processed_dir: data/processed
+        feature_engineering.top_category_count: 20
     outs:
-    - path: metrics.json
+    - path: data/features/test_features.parquet
       hash: md5
-      md5: cc1b25fce72293166a6f96b883405897
-      size: 108
+      md5: 40066a16c02992b64a52f820b757ef68
+      size: 553994
+    - path: data/features/train_features.parquet
+      hash: md5
+      md5: 292b6928c5776224a0804c654dd9fde0
+      size: 2542659
+    - path: data/features/validation_features.parquet
+      hash: md5
+      md5: 003d14c9b48d66fe47ce5b5bb24fd724
+      size: 554165
+    - path: reports/feature_summary.json
+      hash: md5
+      md5: 2078e79c00217aa19e9eda0ff4349214
+      size: 1695

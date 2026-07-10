@@ -1,0 +1,67 @@
+{
+    "train_shape": [
+        106798,
+        29
+    ],
+    "validation_shape": [
+        22885,
+        29
+    ],
+    "test_shape": [
+        22886,
+        29
+    ],
+    "top_categories": [
+        "Restaurant",
+        "Mexican restaurant",
+        "Chinese restaurant",
+        "Fast food restaurant",
+        "Pizza restaurant",
+        "American restaurant",
+        "Italian restaurant",
+        "Sandwich shop",
+        "Seafood restaurant",
+        "Bar & grill",
+        "Thai restaurant",
+        "Japanese restaurant",
+        "Steak house",
+        "Breakfast restaurant",
+        "Barbecue restaurant",
+        "Bar",
+        "Hamburger restaurant",
+        "Sushi restaurant",
+        "Indian restaurant",
+        "Asian restaurant"
+    ],
+    "feature_columns": [
+        "Latitude",
+        "Longitude",
+        "has_website",
+        "has_phone",
+        "has_images",
+        "title_length",
+        "address_length",
+        "cat_American restaurant",
+        "cat_Asian restaurant",
+        "cat_Bar",
+        "cat_Bar & grill",
+        "cat_Barbecue restaurant",
+        "cat_Breakfast restaurant",
+        "cat_Chinese restaurant",
+        "cat_Fast food restaurant",
+        "cat_Hamburger restaurant",
+        "cat_Indian restaurant",
+        "cat_Italian restaurant",
+        "cat_Japanese restaurant",
+        "cat_Mexican restaurant",
+        "cat_Other",
+        "cat_Pizza restaurant",
+        "cat_Restaurant",
+        "cat_Sandwich shop",
+        "cat_Seafood restaurant",
+        "cat_Steak house",
+        "cat_Sushi restaurant",
+        "cat_Thai restaurant",
+        "is_highly_rated"
+    ]
+}
