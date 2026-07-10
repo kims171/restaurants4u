@@ -1,4 +1,4 @@
-# Restaurants4U: Scalable Context-Aware Restaurant Recommendation Engine
+# Restaurants4U: Personalized Restaurant Recommendation Engine
 ### Phase 1 Deliverable: Core MLOps Production Pipeline & System Architecture
 
 ---
@@ -8,14 +8,13 @@
 * **Shini Kim** – ML Lead (Feature Engineering, Core Algorithmic Scripts, & Model Optimization)
 * **Xihai Luo** – Engineering Lead (MLOps Pipeline Infrastructure, DVC Architecture, & Codebase Versioning)
 
----
 
-## Project Overview
+## Project Overview (needs work)
 This project builds an automated, robust, reproducible MLOps pipeline for a **Two-Stage Content-Based Restaurant Recommendation Engine**. Leveraging metadata from hundreds of thousands of food establishments, the system filters out geospatial profiles and uses a Random Forest classifier to predict high-quality dining selections based on user location constraints and baseline characteristics.
 
 ---
 
-## Repository Structure
+## High-level Repository Structure
 ```text
 restaurants4u/
 ├── .dvc/                   # DVC configuration parameters
@@ -36,15 +35,17 @@ restaurants4u/
 
 ## Part 1: Dataset Selection and Documentation
 
-### 1.1 Dataset Specification & Provenance
+### 1.1 Dataset Specification
 
-The underlying intelligence of the recommendation framework relies on the **380,000 Restaurants (Mostly USA Based)** tabular open-source dataset, ingested via the local tracking binary `200k_Restaurants_Mostly_US.csv` (~332 MB). This asset provides a comprehensive geospatial mapping of food service configurations across domestic markets, optimizing resource utilization compared to heavy, unstructured text reviews.
+The dataset we are using is the **380,000 Restaurants (Mostly USA Based)** tabular open-source dataset from Kaggle (~332 MB). This datasets contains a compilation of 380,000 restaurants. While the majority of the restaurants are in the United States, there are also a couple from other countries.
 
-The system frames recommendations as a **Context-Aware Supervised Classification and Ranking Problem**. The target variable ($y$) is a custom-engineered binary label:
+The system frames recommendations as a **Context-Aware Supervised Classification and Ranking Problem**. In simple terms, we want our model to output a list of restaurant rankings near them based on their current location. A use case is when the user wnats to find nearby restaurants that have a high rating.
 
+The target variable ($y$) is a custom-engineered binary label:
 
-**is highly rated = 1, if rating >= 4.0. 0 otherwise**
-
+```python
+Rating >= 4.0 ? is_highly_rated = 1 : is_highly_rated = 0
+```
 
 This threshold functions as our quality boundary metric, modeling the statistical probability that an establishment will satisfy a given consumer request.
 
@@ -54,42 +55,28 @@ This threshold functions as our quality boundary metric, modeling the statistica
 | --- | --- | --- |
 | `Rating` | Continuous Ordinal | Parsed via `pd.to_numeric` to enforce structural evaluation typing; binned to construct target vector $y$. |
 | `Latitude` / `Longitude` | Continuous Geospatial | Validated against global bounding intervals ($[-90, 90]$ / $[-180, 180]$); acts as spatial routing indices. |
-| `Website` / `Phone` / `Images` | Sparse Structural | Missing properties are mapped to binary completeness signals ($0$ for null, $1$ for populated) to evaluate corporate infrastructure density. |
-| `Category` | High-Cardinality Nominal | Grouped via frequency-capping at the 20th percentile; remaining sparse identifiers fold into an `"Other"` token before One-Hot encoding. |
+| `Website` / `Phone` / `Images` | Sparse Structural | Mapped to binary ($0$ for null, $1$ for populated). |
+| `Category` | High-Cardinality Nominal | Grouped via frequency-capping at the 20th percentile; group sparse categories into `"Other"` before One-Hot encoding. |
 
 ### 1.2 Data Quality Assessment & Production Mitigation Strategy
 
 Tabular entries obtained from open scraping ecosystems natively expose high rates of corruption. The data ingestion engine incorporates three strict structural checkpoints within `src/prepare.py` to prevent downstream pipeline crashes:
 
-1. **Type Discrepancy Sanitization:** Mid-file header repetitions and mismatched object string tokens (e.g., text artifacts within numeric coordinate properties) are captured via explicit Pandas numeric coercions: `pd.to_numeric(..., errors='coerce')`. Anomalous text blocks degrade gracefully into nulls (`NaN`).
-2. **Cascading Null Erasure:** Rows containing corrupted metadata anchors (`Rating`, `Latitude`, or `Longitude`) are eliminated using listwise deletion (`dropna`). This keeps missing values from corrupting the distance arrays in our spatial index trees.
-3. **Entity Deduplication:** Identical string entries sharing matching duplicate values across the `Title` and `Address` parameters are pruned. This avoids artificial performance inflation during model evaluation.
+1. **Type Discrepancy Sanitization:**
+Ensure data types are consistent throughout the dataset. Use explicit Pandas numeric coercions: `pd.to_numeric(..., errors='coerce')` to force consistency. Any anonomalies such as "None" strings will turn into nulls (`NaN`).
+2. **Null Values:** Rows containing null values (`Rating`, `Latitude`, or `Longitude`) are eliminated using listwise deletion (`dropna`). This keeps missing values from corrupting the distance arrays in our spatial index trees.
+3. **Duplication:** Identical string entries sharing matching duplicate values across the `Title` and `Address` parameters are pruned. This avoids artificial performance inflation during model evaluation.
 
 ### 1.3 Validation Partition Strategy
 
 To accurately calculate model generalization error without data leakage, the system uses a **Stratified Random Split** on the engineered `is_highly_rated` classification label. This ensures that the class balance is perfectly preserved across partitions:
 
-* **Training Set (80%):** The primary optimization space used by the learning algorithm to adjust ensemble decision boundaries.
+* **Training Set (80%):** Used to fit the model and train the model.
 * **Test Set (20%):** A complete held-out evaluation block used to calculate final performance metrics (Accuracy, Precision, Recall).
 
-### 1.4 Data Version Control (DVC) Local Linear Tracking
+### 1.4 Data Version Control (DVC) with AWS S3 Remote Storage
 
-Large physical tracking files are completely isolated from Git's version control index to prevent repository history corruption. DVC tracks files by generating tiny, text-based pointer assets (`.dvc`) that contain unique MD5 file hashes:
-
-```bash
-# Initialize local MLOps directory config trackers
-dvc init
-
-# Track the specific local raw tabular input data file path
-dvc add data/raw/200k_Restaurants_Mostly_US.csv
-
-# Bind tracking pointers and automatic file ignore filters to Git
-git add data/raw/200k_Restaurants_Mostly_US.csv.dvc data/raw/.gitignore
-git commit -m "track: anchor raw 200k restaurant tabular source data pointer"
-
-```
-
----
+Our actual dataset is stored in AWS S3 and tracked via DVC. DVC tracks files by generating tiny, text-based pointer assets (`.dvc`) that contain unique MD5 file hashes. This allows us to version control large files without bloating the Git repository. Use ``dvc pull`` to retrieve the actual dataset from the S3 remote storage.
 
 ## Part 2: Architecture Design
 
@@ -98,40 +85,40 @@ git commit -m "track: anchor raw 200k restaurant tabular source data pointer"
 * **Storage & Ingestion Security (`PyArrow` Parquet Framework):** Replaces basic CSV outputs with compressed columnar binary `Parquet` frames. This ensures faster disk read/write cycles and preserves strict data schema types across execution steps.
 * **Pipeline Lineage Management (`DVC`):** Decouples large model files and tabular data frames from source code tracking repositories. It matches project dependencies with code execution states to provide verifiable reproducibility (`dvc repro`).
 * **Experiment Management (`MLflow`):** Simplifies hyperparameter grid exploration, metrics logging, and asset tracking, allowing side-by-side run evaluations through an intuitive dashboard interface.
-* **Core Predictive Execution Array (`Scikit-Learn` & `Scipy`):** Provides optimized tree structures (`RandomForestClassifier`) and rapid coordinate spatial trees (`KDTree`) needed to evaluate multidimensional arrays under low latency.
+* **Model Training & Evaluation (`Scikit-Learn`):** Provides Machine Learning Models (`RandomForestClassifier`) used for training and evaluation.
+
+Please note that these two following components will be implemented in the next phase of the project.
+
+* **Spatial Filtering Engine (`Scipy`):** Rapid coordinate spatial trees (`KDTree`) needed to evaluate multidimensional arrays under low latency.
 * **Serving Endpoint Web Gateway (`FastAPI`):** Selected for its native asynchronous code execution, automatic typing enforcement via Pydantic, and low-latency request lifecycle operations.
 
-### 2.2 Architectural Optimization Pivot: Feature Store Streamlining
+### 2.2 Production Inference Serving Strategy
 
-Our initial system specification included a centralized feature store engine (Feast). However, we adapted our system architecture to optimize operational overhead for this project phase.
+The complete recommendation engine handles live requests using an efficient **Two-Stage Retrieval & Ranking Inference Framework**:
 
-Because the restaurant dataset represents highly stable business data profiles rather than high-velocity streaming user click streams, running a live distributed key-value caching engine (like Redis) adds unnecessary infrastructure complexity. Feature mappings are engineered deterministically in our DVC preparation block. This completely removes training-serving skew without introducing the operational overhead of a live database cluster.
-
-### 2.3 Production Inference Serving Strategy
-
-The engine handles live requests using an efficient **Two-Stage Retrieval & Ranking Inference Framework**:
+For Phase 1, we focused on setting up the pipeline with DVC, MLFlow, and AWS S3 remote storage. And also training and evaluating a simple Random Forest model with two experiments - representing a subset of the **Ranking Stage**.
 
 ```
 [Live Inference Payload: User Coordinates + Cuisine Filter]
                          │
                          ▼
 ┌────────────────────────────────────────────────────────┐
-│ 1. RETRIEVAL STAGE (Spatial Filtering Engine)           │
-│    - FastAPI routes query to an internal spatial tree. │
-│    - Haversine bounds filter coordinates dynamically.  │
-│    - Cuts search space from 380k to 200 local options. │
+│ 1. RETRIEVAL STAGE (Spatial Filtering Engine)          │
+│    - FastAPI routes query to an internal spatial tree  │
+│    - Haversine bounds filter coordinates dynamically   │
+│    - Cuts search space from 380k to 200 local options  │
 └────────────────────────┬───────────────────────────────┘
                          │
                          ▼
 ┌────────────────────────────────────────────────────────┐
 │ 2. RANKING STAGE (Supervised Classification Layer)     │
-│    - Candidate parameters are fed to the Forest model. │
+│    - Candidate parameters are fed to the model         │
 │    - Evaluates scores via model.predict_proba()        │
-│    - Blends outputs via an exponential decay function. │
+│    - Blends outputs via an exponential decay function  │
 └────────────────────────┬───────────────────────────────┘
                          │
                          ▼
-[Sort Matrix and Stream Top 10 Best Recommendations to User]
+[Sort and Stream Top 10 Best Recommendations to User]
 
 ```
 
@@ -141,9 +128,7 @@ To prioritize close, highly rated options, predictions are combined with an **Ex
 $$\text{Recommendation Score} = P(\text{Highly Rated}) \times e^{-\lambda \cdot \text{distance}}$$
 
 
-Where $P(\text{Highly Rated})$ is the continuous probability output from the Random Forest model, and $\lambda$ represents our distance penalty hyperparameter. This ensures relevant suggestions are delivered within milliseconds.
-
----
+Where $P(\text{Highly Rated})$ is the continuous probability output from the model, and $\lambda$ represents our distance penalty hyperparameter. This ensures relevant suggestions are delivered within milliseconds.
 
 ## Part 3: DVC Pipeline Implementation
 
@@ -213,18 +198,14 @@ stages:
 
 ### 3.3 Cloud Remote Storage Infrastructure Link
 
-To collaborate across independent development nodes, the project configuration connects directly to an AWS S3 data lake storage remote:
+To collaborate, `dvc push`, each team member must be assigned an access key, e.g., access id and secret key, on AWS IAM. Then the team member must add the access key to their local development environment either through the use of environmental variables or store the credentials in a `.dvc/config.local` file. For pulling, `dvc pull`, no credentials are needed.
 
 ```bash
-# Link the workspace to the group s3 target bucket
-dvc remote add -d s3_remote s3:/ *******TODO***********
+# .dvc/config.local option
+dvc remote modify --local myremote access_key_id "THEIR_AWS_ACCESS_KEY_ID"
 
-# Push physical data frames and assets to the cloud remote
-dvc push
-
+dvc remote modify --local myremote secret_access_key "THEIR_AWS_SECRET_ACCESS_KEY"
 ```
-
----
 
 ## Part 4: Experiment Tracking
 
@@ -263,6 +244,6 @@ Data and pipelines are up to date.
 
 ### 4.3 Evaluation Verification & UI Management
 
-1. **Tracking Dashboard Access:** Run `mlflow ui --port 5000` inside an active terminal workspace window to initialize the server logging daemon.
-2. **Experiment Validation:** Open `http://localhost:5000` to access the MLflow tracking UI. Navigating to the `Restaurant_Metadata_Ranking_Classifier` panel allows you to view the parameters, training run histories, and accuracy scores side by side.
+1. **Tracking Dashboard Access:** Run `mlflow ui` inside an active terminal workspace window to start MLFlow server running on local.
+2. **Experiment Validation:** Open `http://127.0.0.1:5000` to access the MLflow tracking UI. Navigating to the `Restaurant_Metadata_Ranking_Classifier` panel allows you to view the parameters, training run histories, and metrics side by side.
 3. **Visual Metric Analytics:** By selecting both experiment run entries and clicking **Compare**, you can render the parallel coordinates chart. This fulfills the assignment's visual verification criteria, mapping hyperparameter tuning changes directly to model evaluation scores.
