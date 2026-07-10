@@ -22,12 +22,11 @@ feature_engineering:
   feature_report_path: "reports/feature_summary.json"
   top_category_count: 20
 
-
 train:
   experiment_name: "Restaurant_Metadata_Ranking_Classifier"
-  run_name: "baseline_rf_100_depth10"
+  run_name: "experiment_1_rf_200_depth10"
   model_type: "random_forest"
-  n_estimators: 100
+  n_estimators: 200
   max_depth: 10
   min_samples_split: 2
   class_weight: "balanced"
