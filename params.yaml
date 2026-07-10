@@ -24,10 +24,10 @@ feature_engineering:
 
 train:
   experiment_name: "Restaurant_Metadata_Ranking_Classifier"
-  run_name: "experiment_1_rf_200_depth10"
+  run_name: "experiment_2_rf_200_depth20"
   model_type: "random_forest"
   n_estimators: 200
-  max_depth: 10
+  max_depth: 20
   min_samples_split: 2
   class_weight: "balanced"
   model_path: "models/restaurant_classifier.pkl"

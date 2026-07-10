@@ -52,18 +52,18 @@ stages:
       params.yaml:
         train.class_weight: balanced
         train.experiment_name: Restaurant_Metadata_Ranking_Classifier
-        train.max_depth: 10
+        train.max_depth: 20
         train.min_samples_split: 2
         train.model_path: models/restaurant_classifier.pkl
         train.model_type: random_forest
         train.n_estimators: 200
-        train.run_name: experiment_1_rf_200_depth10
+        train.run_name: experiment_2_rf_200_depth20
         train.tracking_uri: sqlite:///mlflow.db
     outs:
     - path: models/restaurant_classifier.pkl
       hash: md5
-      md5: 03ae4af608f943a30c19171b8f8fb9c8
-      size: 12874073
+      md5: 4029ca6d45e881e2e0fa67802993bcd3
+      size: 162721753
   evaluate:
     cmd: python src/evaluate.py
     deps:
@@ -73,8 +73,8 @@ stages:
       size: 553994
     - path: models/restaurant_classifier.pkl
       hash: md5
-      md5: 03ae4af608f943a30c19171b8f8fb9c8
-      size: 12874073
+      md5: 4029ca6d45e881e2e0fa67802993bcd3
+      size: 162721753
     - path: src/evaluate.py
       hash: md5
       md5: 42fdcd22201804b1373c0a27d866916d
@@ -89,24 +89,24 @@ stages:
     outs:
     - path: metrics.json
       hash: md5
-      md5: 4335f6e18692176c163dbebf3731a13c
-      size: 370
+      md5: 9775efc89bfb6f6a3789a9e22b08e6ad
+      size: 369
     - path: reports/classification_report.json
       hash: md5
-      md5: 1606a7e2c33e9af94733b0a46bddb1ef
-      size: 737
+      md5: cf2e6f79f1f1a2ec04a50676159eef7a
+      size: 736
     - path: reports/confusion_matrix.png
       hash: md5
-      md5: 66d9a14fdee1bbb3ff6314ee6d420201
-      size: 46599
+      md5: 1d407d8413ec27c1ed1b37908607b742
+      size: 47444
     - path: reports/precision_recall_curve.png
       hash: md5
-      md5: 5841d6063ba3b018565e6673116db6d3
-      size: 37482
+      md5: f28b33636f2d2bc79a448a12d7248279
+      size: 36911
     - path: reports/roc_curve.png
       hash: md5
-      md5: c4ecb741c5f9babbc990b7ab1e33e978
-      size: 48402
+      md5: efd48757f7dd23325799b943f5224edc
+      size: 48333
   validate_data:
     cmd: python src/validate_data.py
     deps:
