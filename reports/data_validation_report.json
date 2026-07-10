@@ -1,0 +1,27 @@
+{
+    "original_rows": 219299,
+    "original_columns": 11,
+    "missing_values": {
+        "Title": 0,
+        "Address": 69,
+        "Link": 19565,
+        "Category": 29,
+        "Rating": 23705,
+        "Website": 54277,
+        "Phone": 27496,
+        "Images": 19565,
+        "Categories": 19594,
+        "Latitude": 0,
+        "Longitude": 217
+    },
+    "duplicate_rows": 18554,
+    "invalid_rating_count": 23706,
+    "invalid_latitude_count": 218,
+    "invalid_longitude_count": 218,
+    "rating_out_of_range_count": 23706,
+    "latitude_out_of_range_count": 218,
+    "longitude_out_of_range_count": 218,
+    "duplicate_business_count": 43024,
+    "validated_rows": 152569,
+    "rows_removed": 66730
+}
