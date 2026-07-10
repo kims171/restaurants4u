@@ -25,6 +25,7 @@ def load_config():
 
 
 def train_model():
+    
     config = load_config()
     train_cfg = config["train"]
     feature_cfg = config["feature_engineering"]
