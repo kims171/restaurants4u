@@ -19,23 +19,23 @@ stages:
     outs:
     - path: data/processed/test.parquet
       hash: md5
-      md5: 85ad3d91387764d64208e0cc5a9d3304
-      size: 1086678
+      md5: 1b03d7ea8260975a3d908c28a6412b2a
+      size: 1086689
     - path: data/processed/train.parquet
       hash: md5
-      md5: 55201b196d9c133de648cbfa65532a85
-      size: 3972270
+      md5: d6503800fab286e12119a1ae90859107
+      size: 3972281
   train:
     cmd: python src/train.py
     deps:
     - path: data/processed/train.parquet
       hash: md5
-      md5: 55201b196d9c133de648cbfa65532a85
-      size: 3972270
+      md5: d6503800fab286e12119a1ae90859107
+      size: 3972281
     - path: src/train.py
       hash: md5
-      md5: 7d5dd022b84239b7527990bbb156810f
-      size: 1489
+      md5: 9d239f24f10a19c8f5c6f63929135a80
+      size: 1453
     params:
       params.yaml:
         train.max_depth: 10
@@ -44,19 +44,19 @@ stages:
     outs:
     - path: models/restaurant_classifier.pkl
       hash: md5
-      md5: e793e5742559069b5eabac3188baa553
-      size: 5527817
+      md5: 4066f1df5994e2e4678e2531b748047b
+      size: 5525769
   evaluate:
     cmd: python src/evaluate.py
     deps:
     - path: data/processed/test.parquet
       hash: md5
-      md5: 85ad3d91387764d64208e0cc5a9d3304
-      size: 1086678
+      md5: 1b03d7ea8260975a3d908c28a6412b2a
+      size: 1086689
     - path: models/restaurant_classifier.pkl
       hash: md5
-      md5: e793e5742559069b5eabac3188baa553
-      size: 5527817
+      md5: 4066f1df5994e2e4678e2531b748047b
+      size: 5525769
     - path: src/evaluate.py
       hash: md5
       md5: 02a5244b96de1ba0047b018f60cab07d
@@ -64,5 +64,5 @@ stages:
     outs:
     - path: metrics.json
       hash: md5
-      md5: a1d2c0a2b8e233855cb4722700d9b142
-      size: 102
+      md5: cc1b25fce72293166a6f96b883405897
+      size: 108
