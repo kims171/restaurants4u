@@ -1,0 +1,13 @@
+prepare:
+  raw_input_path: "data/raw/200k_Restaurants_Mostly_US.csv"
+  processed_dir: "data/processed"
+  test_size: 0.2
+  seed: 42
+
+train:
+  n_estimators: 100
+  max_depth: 10
+  model_path: "models/restaurant_classifier.pkl"
+
+evaluate:
+  metrics_path: "metrics.json"
