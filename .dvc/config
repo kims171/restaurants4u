@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = https://amazonaws.com
+    url = s3://phase1-data
