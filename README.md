@@ -86,6 +86,7 @@ Our actual dataset is stored in AWS S3 and tracked via DVC. DVC tracks files by 
 * **Pipeline Lineage Management (`DVC`):** Decouples large model files and tabular data frames from source code tracking repositories. It matches project dependencies with code execution states to provide verifiable reproducibility (`dvc repro`).
 * **Experiment Management (`MLflow`):** Simplifies hyperparameter grid exploration, metrics logging, and asset tracking, allowing side-by-side run evaluations through an intuitive dashboard interface.
 * **Model Training & Evaluation (`Scikit-Learn`):** Provides Machine Learning Models (`RandomForestClassifier`) used for training and evaluation.
+* **Deployment Strategy (`Streaming`):** The system is designed to handle live requests in a streaming fashion, where the user sends their coordinates and cuisine filter, and then the system returns the top 10 recommendations in real-time.
 
 Please note that these two following components will be implemented in the next phase of the project.
 
