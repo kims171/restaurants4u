@@ -9,8 +9,8 @@
 * **Xihai Luo** – Engineering Lead (MLOps Pipeline Infrastructure, DVC Architecture, & Codebase Versioning)
 
 
-## Project Overview (needs work)
-This project builds an automated, robust, reproducible MLOps pipeline for a **Two-Stage Content-Based Restaurant Recommendation Engine**. Leveraging metadata from hundreds of thousands of food establishments, the system filters out geospatial profiles and uses a Random Forest classifier to predict high-quality dining selections based on user location constraints and baseline characteristics.
+## Project Overview
+This project builds an automated, robust, reproducible MLOps pipeline for a **Two-Stage Content-Based Restaurant Recommendation Engine**. Leveraging metadata from hundreds of thousands of food establishments, the system filters out geospatial profiles and uses Machine Learning to predict high-quality dining selections based on user location constraints and baseline characteristics.
 
 ---
 
@@ -99,29 +99,7 @@ The complete recommendation engine handles live requests using an efficient **Tw
 
 For Phase 1, we focused on setting up the pipeline with DVC, MLFlow, and AWS S3 remote storage. And also training and evaluating a simple Random Forest model with two experiments - representing a subset of the **Ranking Stage**.
 
-```
-[Live Inference Payload: User Coordinates + Cuisine Filter]
-                         │
-                         ▼
-┌────────────────────────────────────────────────────────┐
-│ 1. RETRIEVAL STAGE (Spatial Filtering Engine)          │
-│    - FastAPI routes query to an internal spatial tree  │
-│    - Haversine bounds filter coordinates dynamically   │
-│    - Cuts search space from 380k to 200 local options  │
-└────────────────────────┬───────────────────────────────┘
-                         │
-                         ▼
-┌────────────────────────────────────────────────────────┐
-│ 2. RANKING STAGE (Supervised Classification Layer)     │
-│    - Candidate parameters are fed to the model         │
-│    - Evaluates scores via model.predict_proba()        │
-│    - Blends outputs via an exponential decay function  │
-└────────────────────────┬───────────────────────────────┘
-                         │
-                         ▼
-[Sort and Stream Top 10 Best Recommendations to User]
-
-```
+![Complete architecture strategy](https://cdn.discordapp.com/attachments/932417023290531902/1525219686634229861/Untitled_Diagram.drawio_2.png?ex=6a529706&is=6a514586&hm=fa06eef376a2ad70100202b4290ff43ce533dfb1ea495a63f71a6b80dd84a9cb&)
 
 To prioritize close, highly rated options, predictions are combined with an **Exponential Distance Decay Function**:
 
@@ -130,6 +108,9 @@ $$\text{Recommendation Score} = P(\text{Highly Rated}) \times e^{-\lambda \cdot 
 
 
 Where $P(\text{Highly Rated})$ is the continuous probability output from the model, and $\lambda$ represents our distance penalty hyperparameter. This ensures relevant suggestions are delivered within milliseconds.
+
+### 2.3 Model Training & Evaluation Strategy
+![Model Architecture Strategy](https://cdn.discordapp.com/attachments/932417023290531902/1525217906705563748/Model_Strategy.png?ex=6a52955e&is=6a5143de&hm=42f37f2dc5a14923a955e5c20f01f1afbd4fa96f0c850847e4f5ddefaaff522e&)
 
 ## Part 3: DVC Pipeline Implementation
 
