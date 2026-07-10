@@ -56,14 +56,14 @@ stages:
         train.min_samples_split: 2
         train.model_path: models/restaurant_classifier.pkl
         train.model_type: random_forest
-        train.n_estimators: 100
+        train.n_estimators: 200
         train.run_name: baseline_rf_100_depth10
         train.tracking_uri: sqlite:///mlflow.db
     outs:
     - path: models/restaurant_classifier.pkl
       hash: md5
-      md5: a49571b8da19f12888f1c5cd1e43da77
-      size: 6311193
+      md5: 03ae4af608f943a30c19171b8f8fb9c8
+      size: 12874073
   evaluate:
     cmd: python src/evaluate.py
     deps:
@@ -73,8 +73,8 @@ stages:
       size: 553994
     - path: models/restaurant_classifier.pkl
       hash: md5
-      md5: a49571b8da19f12888f1c5cd1e43da77
-      size: 6311193
+      md5: 03ae4af608f943a30c19171b8f8fb9c8
+      size: 12874073
     - path: src/evaluate.py
       hash: md5
       md5: 42fdcd22201804b1373c0a27d866916d
@@ -89,24 +89,24 @@ stages:
     outs:
     - path: metrics.json
       hash: md5
-      md5: cdd7e0b496328027e6988a74de62a996
+      md5: 4335f6e18692176c163dbebf3731a13c
       size: 370
     - path: reports/classification_report.json
       hash: md5
-      md5: 8ed4ba657bdc94e890a94a67c4a31226
+      md5: 1606a7e2c33e9af94733b0a46bddb1ef
       size: 737
     - path: reports/confusion_matrix.png
       hash: md5
-      md5: d498d9d42888a8a6fa2e3c01bdfeae98
-      size: 45103
+      md5: 66d9a14fdee1bbb3ff6314ee6d420201
+      size: 46599
     - path: reports/precision_recall_curve.png
       hash: md5
-      md5: d80057b4d267babef6d606f285d51049
-      size: 36529
+      md5: 5841d6063ba3b018565e6673116db6d3
+      size: 37482
     - path: reports/roc_curve.png
       hash: md5
-      md5: bd4322bea4702f9139879c560947639d
-      size: 48503
+      md5: c4ecb741c5f9babbc990b7ab1e33e978
+      size: 48402
   validate_data:
     cmd: python src/validate_data.py
     deps:
