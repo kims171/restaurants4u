@@ -21,8 +21,8 @@ from pathlib import Path
 
 import pandas as pd
 from evidently import ColumnMapping
-from evidently.report import Report
 from evidently.metric_preset import DataDriftPreset
+from evidently.report import Report
 
 FEATURE_COLUMNS = [
     "latitude",
