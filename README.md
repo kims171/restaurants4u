@@ -304,3 +304,53 @@ Data and pipelines are up to date.
 3. **Visual Metric Analytics:** By selecting both experiment run entries and clicking **Compare**, you can render the parallel coordinates chart. This fulfills the assignment's visual verification criteria, mapping hyperparameter tuning changes directly to model evaluation scores.
 
 
+## CI/CD Pipeline
+
+This project uses GitHub Actions to automate quality checks and deployment support.
+
+The CI/CD workflow includes:
+
+- dependency installation
+- linting with Ruff
+- formatting checks with Ruff
+- unit tests with Pytest
+- data validation tests
+- Docker build
+- deployment workflow support
+
+To run the checks locally:
+
+```bash
+ruff check .
+ruff format --check .
+pytest tests/ -v
+```
+
+## Monitoring and Drift Detection
+
+The project uses EvidentlyAI to monitor data drift between reference restaurant data and production-like restaurant data.
+
+The monitoring workflow generates:
+
+- `monitoring/reports/drift_report.html`
+- `monitoring/drift_summary.json`
+
+The drift report checks whether new restaurant data differs from the reference dataset in ways that could affect prediction quality. Important monitored areas include category distribution, rating distribution, missing values, and location-related changes.
+
+## Retraining Strategy
+
+Retraining is triggered when drift is detected, when model performance drops below the accepted baseline, or when new restaurant data differs significantly from the original training distribution.
+
+A candidate retrained model is compared against the current production model before promotion. The candidate model is only promoted if it improves or maintains important metrics such as F1 score, recall, and balanced accuracy.
+
+Retraining comparison report:
+
+- `monitoring/reports/retraining_comparison.md`
+
+## Model Card
+
+The model card documents the model purpose, intended use, limitations, monitoring plan, retraining plan, and ethical considerations.
+
+See:
+
+- `model_card.md`
