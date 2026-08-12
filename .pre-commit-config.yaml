@@ -1,5 +1,5 @@
 repos:
-  # Git safety checks
+  # Checks that run before commit
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -7,3 +7,13 @@ repos:
         args: ['--maxkb=5000']
       - id: end-of-file-fixer
       - id: trailing-whitespace
+
+  # Check DVC before git push
+  - repo: local
+    hooks:
+      - id: dvc-pre-push
+        name: Check DVC before push
+        entry: dvc push --dry-run
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
