@@ -1,5 +1,5 @@
 {
-  "family": "restaurants4u-api",
+  "family": "restaurants4u-container",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
@@ -7,7 +7,7 @@
   "executionRoleArn": "REPLACE_WITH_ECS_TASK_EXECUTION_ROLE_ARN",
   "containerDefinitions": [
     {
-      "name": "restaurants4u-api",
+      "name": "restaurants4u-container",
       "image": "REPLACE_ME_BY_CI",
       "portMappings": [
         {
@@ -19,7 +19,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/restaurants4u-api",
+          "awslogs-group": "/ecs/restaurants4u-task",
           "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
         }
