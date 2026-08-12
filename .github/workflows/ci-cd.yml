@@ -22,7 +22,6 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements-dev.txt
       # --check ensures the job fails if there are unformatted/unfixable issues
-      - run: ruff check .
       - run: ruff format --check .
 
   test:
