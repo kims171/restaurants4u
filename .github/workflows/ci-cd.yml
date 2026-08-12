@@ -57,15 +57,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Pull model artifact from DVC remote
-        # models/restaurant_classifier.pkl and data/validated/*.parquet are
-        # pipeline-stage outputs (tracked via dvc.lock) — pull output paths
-        # directly, not .dvc files (there aren't any for these).
-        # reports/feature_summary.json is cache:false, so it's committed
-        # directly to git and already present from actions/checkout.
-        run: |
-          dvc pull models/restaurant_classifier.pkl
-          dvc pull data/validated/restaurants_validated.parquet
+       # Pull only the raw data needed to kick off the pipeline
+      - name: Pull Input Data Only from DVC
+        run: dvc pull data/raw/200k_Restaurants_Mostly_US.csv
+
+      # This will run your training script and generate
+      # models/restaurant_classifier.pkl dynamically on the runner
+      - name: Reproduce DVC Pipeline
+        run: dvc repro
+
+      # Upload the new model and validated parquets to your S3 storage
+      - name: Push Newly Trained Model to Remote
+        if: github.ref == 'refs/heads/main' # Optional: Only push to remote on main branch merges
+        run: dvc push
 
       - name: Login to Amazon ECR
         id: login-ecr
