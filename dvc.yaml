@@ -5,9 +5,6 @@ stages:
       - src/validate_data.py
       - data/raw/200k_Restaurants_Mostly_US.csv
     params:
-      - validate_data.raw_input_path
-      - validate_data.validated_output_path
-      - validate_data.validation_report_path
       - validate_data.rating_column
       - validate_data.latitude_column
       - validate_data.longitude_column
@@ -25,8 +22,6 @@ stages:
       - src/prepare.py
       - data/validated/restaurants_validated.parquet
     params:
-      - prepare.validated_input_path
-      - prepare.processed_dir
       - prepare.test_size
       - prepare.validation_size
       - prepare.seed
@@ -40,13 +35,11 @@ stages:
     cmd: python src/feature_engineering.py
     deps:
       - src/feature_engineering.py
+      - src/features.py
       - data/processed/train.parquet
       - data/processed/validation.parquet
       - data/processed/test.parquet
     params:
-      - feature_engineering.processed_dir
-      - feature_engineering.features_dir
-      - feature_engineering.feature_report_path
       - feature_engineering.top_category_count
     outs:
       - data/features/train_features.parquet
@@ -63,15 +56,10 @@ stages:
       - data/features/train_features.parquet
       - data/features/validation_features.parquet
     params:
-      - train.experiment_name
-      - train.run_name
-      - train.model_type
       - train.n_estimators
       - train.max_depth
       - train.min_samples_split
       - train.class_weight
-      - train.model_path
-      - train.tracking_uri
     outs:
       - models/restaurant_classifier.pkl
 
@@ -81,18 +69,13 @@ stages:
       - src/evaluate.py
       - models/restaurant_classifier.pkl
       - data/features/test_features.parquet
-    params:
-      - evaluate.metrics_path
-      - evaluate.classification_report_path
-      - evaluate.confusion_matrix_path
-      - evaluate.roc_curve_path
-      - evaluate.precision_recall_curve_path
     metrics:
       - metrics.json:
           cache: false
-      - reports/classification_report.json:
-          cache: false
     plots:
-      - reports/confusion_matrix.png
-      - reports/roc_curve.png
-      - reports/precision_recall_curve.png
+      - reports/confusion_matrix.png:
+          cache: false
+      - reports/roc_curve.png:
+          cache: false
+      - reports/precision_recall_curve.png:
+          cache: false
