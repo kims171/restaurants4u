@@ -62,7 +62,9 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Pull DVC files
-        run: dvc pull -v
+        run: |
+          dvc config --local 'remote.myremote.ssl_verify' false
+          dvc pull -v
 
       - name: Check DVC status
         run: dvc status

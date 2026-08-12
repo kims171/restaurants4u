@@ -3,4 +3,3 @@
     autostage = true
 ['remote "myremote"']
     url = s3://amzn-s3-dvc/data
-    profile = ''
