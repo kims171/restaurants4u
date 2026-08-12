@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 
-
 OUTPUT_PATH = Path("data/production_logs/latest.parquet")
 
 
