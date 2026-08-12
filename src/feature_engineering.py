@@ -4,69 +4,12 @@ import os
 import pandas as pd
 import yaml
 
-
-TARGET = "is_highly_rated"
+from features import engineer_features  # noqa: F401  (re-exported for callers/tests)
 
 
 def load_config():
     with open("params.yaml", "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
-
-
-def engineer_features(df, top_categories=None, top_category_count=20):
-    df = df.copy()
-
-    # Presence-based features
-    for source_col, new_col in [
-        ("Website", "has_website"),
-        ("Phone", "has_phone"),
-        ("Images", "has_images"),
-    ]:
-        if source_col in df.columns:
-            df[new_col] = df[source_col].notna().astype(int)
-        else:
-            df[new_col] = 0
-
-    # Text-length structural feature
-    if "Title" in df.columns:
-        df["title_length"] = df["Title"].fillna("").astype(str).str.len()
-    else:
-        df["title_length"] = 0
-
-    if "Address" in df.columns:
-        df["address_length"] = df["Address"].fillna("").astype(str).str.len()
-    else:
-        df["address_length"] = 0
-
-    # Category capping
-    if "Category" in df.columns:
-        df["Category"] = df["Category"].fillna("Unknown").astype(str)
-
-        if top_categories is None:
-            top_categories = df["Category"].value_counts().head(top_category_count).index.tolist()
-
-        df["clean_category"] = df["Category"].apply(
-            lambda x: x if x in top_categories else "Other"
-        )
-    else:
-        df["clean_category"] = "Unknown"
-        if top_categories is None:
-            top_categories = ["Unknown"]
-
-    category_encoded = pd.get_dummies(df["clean_category"], prefix="cat")
-
-    numeric_columns = []
-
-    for col in ["Latitude", "Longitude", "has_website", "has_phone", "has_images", "title_length", "address_length"]:
-        if col in df.columns:
-            numeric_columns.append(col)
-
-    feature_df = pd.concat(
-        [df[numeric_columns], category_encoded, df[[TARGET]]],
-        axis=1,
-    )
-
-    return feature_df, top_categories
 
 
 def main():

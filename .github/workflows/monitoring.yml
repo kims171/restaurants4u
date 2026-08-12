@@ -1,0 +1,113 @@
+name: Model Monitoring
+
+on:
+  schedule:
+    # Runs daily at 06:00 UTC. Adjust cadence to match production traffic volume.
+    - cron: "0 6 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    outputs:
+      retrain_recommended: ${{ steps.check.outputs.retrain_recommended }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install "dvc[s3]" evidently pandas
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Pull reference + production data from DVC/S3
+        run: |
+          # data/processed/train.parquet is a pipeline-stage output
+          # (dvc.yaml's prepare stage, tracked via dvc.lock) — pull the
+          # output path directly, not a .dvc file.
+          dvc pull data/processed/train.parquet
+          # TODO: replace with wherever production request logs land, e.g.:
+          # aws s3 cp s3://restaurants4u-prod-logs/latest.parquet data/production_logs/latest.parquet
+          echo "Ensure data/production_logs/latest.parquet exists before this step in your setup."
+
+      - name: Run drift detection
+        id: check
+        run: |
+          set +e
+          python monitoring/drift_detection.py \
+            --reference data/processed/train.parquet \
+            --current data/production_logs/latest.parquet \
+            --threshold 0.5
+          exit_code=$?
+          set -e
+          if [ "$exit_code" -eq 1 ]; then
+            echo "retrain_recommended=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "retrain_recommended=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload drift report
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: |
+            monitoring/reports/drift_report.html
+            monitoring/drift_summary.json
+
+  retrain:
+    runs-on: ubuntu-latest
+    needs: drift-check
+    if: needs.drift-check.outputs.retrain_recommended == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install "dvc[s3]" scikit-learn pandas mlflow
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Pull raw data
+        # data/raw/*.csv is tracked via a standalone `dvc add` (.dvc file),
+        # not a pipeline-stage output, so it can't be pulled by directory
+        # name — target the .dvc pointer file, or pull everything.
+        run: dvc pull data/raw/200k_Restaurants_Mostly_US.csv.dvc
+
+      - name: Retrain via DVC pipeline
+        run: python monitoring/retrain.py
+
+      - name: Open PR with retrained model
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Auto-retrain: drift detected, model refreshed via dvc repro"
+          title: "[Auto-Retrain] Data drift detected — updated model"
+          body: |
+            Triggered automatically by the Model Monitoring workflow.
+
+            Data drift exceeded the configured threshold. This PR contains
+            the result of `dvc repro` against current raw data. Review
+            `metrics.json` before merging — merging to `main` will cause
+            CI/CD to build and deploy this model to production.
+          branch: auto-retrain/drift-${{ github.run_id }}
+          add-paths: |
+            metrics.json
+            dvc.lock
