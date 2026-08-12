@@ -21,8 +21,9 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -r requirements-dev.txt
-      - run: ruff check --fix .
-      - run: ruff format .
+      # --check ensures the job fails if there are unformatted/unfixable issues
+      - run: ruff check .
+      - run: ruff format --check .
 
   test:
     runs-on: ubuntu-latest
@@ -44,12 +45,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # NOTE: models/restaurant_classifier.pkl is DVC-tracked, not stored in git.
-      # Pull it from the S3 remote before building the image so the artifact
-      # actually ships inside the container.
-      - name: Install DVC
-        run: pip install "dvc[s3]"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
+      # CRITICAL: Install both runtime dependencies for your training scripts and DVC
+      - name: Install dependencies and DVC
+        run: |
+          pip install -r requirements-dev.txt
+          pip install "dvc[s3]"
+
+      # Configure AWS credentials for both DVC S3 bucket access and ECR access
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -57,18 +63,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-       # Pull only the raw data needed to kick off the pipeline
-      - name: Pull Input Data Only from DVC
+      - name: Pull Input Data from DVC
         run: dvc pull data/raw/200k_Restaurants_Mostly_US.csv
 
-      # This will run your training script and generate
-      # models/restaurant_classifier.pkl dynamically on the runner
       - name: Reproduce DVC Pipeline
         run: dvc repro
 
-      # Upload the new model and validated parquets to your S3 storage
       - name: Push Newly Trained Model to Remote
-        if: github.ref == 'refs/heads/main' # Optional: Only push to remote on main branch merges
         run: dvc push
 
       - name: Login to Amazon ECR
