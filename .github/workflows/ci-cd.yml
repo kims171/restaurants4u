@@ -61,13 +61,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Configure DVC remote
-        run: |
-          dvc remote list
-          dvc remote modify myremote --local access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          dvc remote modify myremote --local secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          dvc config --local 'remote.myremote.profile' 'default'
-
       - name: Pull DVC files
         run: dvc pull -v
 
