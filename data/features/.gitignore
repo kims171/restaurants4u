@@ -1,3 +1,6 @@
 data/features/train_features.parquet
 data/features/validation_features.parquet
 data/features/test_features.parquet
+/train_features.parquet
+/validation_features.parquet
+/test_features.parquet
