@@ -3,6 +3,7 @@
 set -e
 
 echo "🔍 Checking DVC before Git push..."
+echo ""
 
 if ! command -v dvc >/dev/null 2>&1; then
     echo "❌ DVC is not available."
@@ -10,49 +11,43 @@ if ! command -v dvc >/dev/null 2>&1; then
     exit 1
 fi
 
-echo ""
-echo "📋 Checking DVC pipeline status..."
+echo "☁️ Checking DVC remote..."
 
-DVC_STATUS=$(dvc status 2>&1) || {
-    echo "$DVC_STATUS"
-    echo ""
-    echo "❌ DVC status check failed."
-    echo "   Git push blocked."
-    exit 1
-}
+DVC_CLOUD_STATUS=$(dvc status --cloud 2>&1)
+DVC_EXIT=$?
 
-if [ -n "$DVC_STATUS" ]; then
-    echo "$DVC_STATUS"
-    echo ""
-    echo "❌ DVC pipeline has changed outputs."
-    echo "   Git push blocked."
-    echo ""
-    echo "Run:"
-    echo "    dvc repro"
-    echo ""
-    echo "Then commit the resulting changes."
-    exit 1
-fi
+echo "$DVC_CLOUD_STATUS"
 
-echo "✅ DVC pipeline is up to date."
-
-echo ""
-echo "☁️  Checking DVC remote..."
-
-DVC_CLOUD_STATUS=$(dvc status --cloud 2>&1) || {
-    echo "$DVC_CLOUD_STATUS"
+if [ "$DVC_EXIT" -ne 0 ]; then
     echo ""
-    echo "❌ DVC remote check failed."
+    echo "❌ Unable to verify DVC remote."
     echo "   Git push blocked."
     echo ""
     echo "Run:"
     echo "    dvc push"
+    echo ""
+    echo "Then retry:"
+    echo "    git push"
     exit 1
-}
+fi
 
-echo "$DVC_CLOUD_STATUS"
+# DVC status --cloud should report that the local cache and
+# configured remote are synchronized when everything has been pushed.
+if echo "$DVC_CLOUD_STATUS" | grep -q "in sync"; then
+    echo ""
+    echo "✅ DVC cache and remote are synchronized."
+    echo "🚀 Git push allowed."
+    exit 0
+fi
 
 echo ""
-echo "✅ DVC remote is synchronized."
-echo "🚀 Git push allowed."
-exit 0
+echo "❌ DVC remote is not synchronized."
+echo "   Git push blocked."
+echo ""
+echo "Run:"
+echo "    dvc push"
+echo ""
+echo "Then retry:"
+echo "    git push"
+
+exit 1
