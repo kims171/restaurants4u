@@ -8,12 +8,12 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
 
-  # Check DVC before git push
+  # DVC check before git push
   - repo: local
     hooks:
       - id: dvc-pre-push
         name: Check DVC before push
-        entry: dvc push --dry-run
+        entry: bash scripts/dvc-pre-push.sh
         language: system
         pass_filenames: false
         stages: [pre-push]
