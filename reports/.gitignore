@@ -1,3 +1,6 @@
 /confusion_matrix.png
 /roc_curve.png
 /precision_recall_curve.png
+/classification_report.json
+/data_validation_report.json
+/feature_summary.json
