@@ -64,7 +64,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Pull Input Data from DVC
-        run: dvc pull data/raw/200k_Restaurants_Mostly_US.csv
+        run: dvc pull
 
       - name: Reproduce DVC Pipeline
         run: dvc repro
