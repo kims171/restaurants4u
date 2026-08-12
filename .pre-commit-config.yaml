@@ -6,7 +6,6 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=5000']
       - id: end-of-file-fixer
-      - id: trailing-whitespace
 
   # DVC check before git push
   - repo: local
