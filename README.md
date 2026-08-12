@@ -302,5 +302,3 @@ Data and pipelines are up to date.
 1. **Tracking Dashboard Access:** Run `mlflow ui` inside an active terminal workspace window to start MLFlow server running on local.
 2. **Experiment Validation:** Open `http://127.0.0.1:5000` to access the MLflow tracking UI. Navigating to the `Restaurant_Metadata_Ranking_Classifier` panel allows you to view the parameters, training run histories, and metrics side by side.
 3. **Visual Metric Analytics:** By selecting both experiment run entries and clicking **Compare**, you can render the parallel coordinates chart. This fulfills the assignment's visual verification criteria, mapping hyperparameter tuning changes directly to model evaluation scores.
-
-
