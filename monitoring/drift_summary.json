@@ -1,0 +1,7 @@
+{
+  "share_of_drifted_columns": 0.14285714285714285,
+  "dataset_drift_detected": false,
+  "retrain_recommended": false,
+  "threshold": 0.5,
+  "report_path": "monitoring\\reports\\drift_report.html"
+}
