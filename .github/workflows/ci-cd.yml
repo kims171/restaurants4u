@@ -63,8 +63,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Pull Input Data from DVC
-        run: dvc pull
+      - name: Configure DVC remote
+        run: |
+          dvc remote modify myremote --local access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          dvc remote modify myremote --local secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - run: dvc pull
+
+      - name: Check DVC status
+        run: dvc status
 
       - name: Reproduce DVC Pipeline
         run: dvc repro
