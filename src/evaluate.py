@@ -7,7 +7,7 @@ import mlflow
 import pandas as pd
 import yaml
 from sklearn.metrics import (
-    ConfusionMatrixDisplay,
+    #ConfusionMatrixDisplay,
     PrecisionRecallDisplay,
     RocCurveDisplay,
     accuracy_score,
@@ -21,7 +21,6 @@ from sklearn.metrics import (
     roc_auc_score,
     roc_curve,
 )
-
 
 TARGET = "is_highly_rated"
 
@@ -77,7 +76,7 @@ def evaluate_model():
     with open(eval_cfg["classification_report_path"], "w", encoding="utf-8") as f:
         json.dump(report, f, indent=4)
 
-    matrix_display = ConfusionMatrixDisplay.from_predictions(y_test, preds)
+    #matrix_display = ConfusionMatrixDisplay.from_predictions(y_test, preds)
     plt.title("Confusion Matrix")
     plt.tight_layout()
     plt.savefig(eval_cfg["confusion_matrix_path"], dpi=200)

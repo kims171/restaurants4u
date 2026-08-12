@@ -35,7 +35,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install -r requirements-dev.txt
-      - run: pytest tests/ -v
+      - run: PYTHONPATH=${{ github.workspace }} pytest tests/ -v
 
   build-and-push:
     runs-on: ubuntu-latest

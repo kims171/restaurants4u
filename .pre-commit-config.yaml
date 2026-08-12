@@ -1,0 +1,17 @@
+repos:
+  # Checks that run before commit
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+
+  # DVC check before git push
+  - repo: local
+    hooks:
+      - id: dvc-pre-push
+        name: Check DVC before push
+        entry: bash scripts/dvc-pre-push.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
