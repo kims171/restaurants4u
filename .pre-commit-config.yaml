@@ -5,7 +5,6 @@ repos:
     hooks:
       - id: check-added-large-files
         args: ['--maxkb=5000']
-      - id: end-of-file-fixer
 
   # DVC check before git push
   - repo: local
