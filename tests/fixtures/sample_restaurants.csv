@@ -1,0 +1,5 @@
+Title,Category,Rating,Latitude,Longitude,Website,Phone
+Sample Restaurant A,Restaurant,4.5,43.6532,-79.3832,https://example-a.com,1234567890
+Sample Restaurant B,Cafe,3.8,43.6510,-79.3800,https://example-b.com,1234567891
+Sample Restaurant C,Fast Food,4.1,43.6600,-79.3900,,1234567892
+Sample Restaurant D,Dessert,4.7,43.6550,-79.3840,https://example-d.com,
