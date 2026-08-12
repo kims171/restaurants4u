@@ -49,13 +49,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      # CRITICAL: Install both runtime dependencies for your training scripts and DVC
       - name: Install dependencies and DVC
         run: |
           pip install -r requirements-dev.txt
           pip install "dvc[s3]"
 
-      # Configure AWS credentials for both DVC S3 bucket access and ECR access
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -65,9 +63,16 @@ jobs:
 
       - name: Configure DVC remote
         run: |
+          dvc remote list
           dvc remote modify myremote --local access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           dvc remote modify myremote --local secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - run: dvc pull
+          dvc config --local 'remote.myremote.profile' 'default'
+
+      - name: Pull DVC files
+        run: dvc pull -v
+
+      - name: Check DVC status
+        run: dvc status
 
       - name: Check DVC status
         run: dvc status
