@@ -24,6 +24,7 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
+      - run: ruff format --check .
 
   test:
     runs-on: ubuntu-latest
