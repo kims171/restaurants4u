@@ -4,7 +4,7 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
   "memory": "1024",
-  "executionRoleArn": "REPLACE_WITH_ECS_TASK_EXECUTION_ROLE_ARN",
+  "executionRoleArn": "arn:aws:iam::041194535888:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "restaurants4u-container",
