@@ -16,6 +16,7 @@ An automated, reproducible MLOps pipeline for a **Two-Stage Content-Based Restau
 ## Quickstart
 
 ```bash
+dvc pull
 pip install -r requirements-dev.txt
 
 # Run the pipeline (or `dvc repro` to do the same via DVC)
