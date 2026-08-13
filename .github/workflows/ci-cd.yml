@@ -113,7 +113,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: task-definition.json
-          container-name: restaurants4u-container
+          container-name: restaurants4u-task
           image: ${{ needs.build-and-push.outputs.image }}
 
       - name: Deploy to Amazon ECS

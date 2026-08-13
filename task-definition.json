@@ -1,13 +1,13 @@
 {
-  "family": "restaurants4u-container",
+  "family": "restaurants4u-task",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "1024",
+  "cpu": "1024",
+  "memory": "2048",
   "executionRoleArn": "arn:aws:iam::041194535888:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
-      "name": "restaurants4u-container",
+      "name": "restaurants4u-task",
       "image": "REPLACE_ME_BY_CI",
       "portMappings": [
         {
