@@ -14,10 +14,16 @@ An automated, reproducible MLOps pipeline for a **Two-Stage Content-Based Restau
 ---
 
 ## Quickstart
-
+Replace ``<ACCESS_KEY_ID>`` and ``<SECRET_KEY>`` from [Temp Access Keys](https://docs.google.com/document/d/16e5qQqCmgpiAiKJ4isT9rIUIaZuF946MDG8Kzs3BG8A/edit?usp=sharing")
 ```bash
-dvc pull
+# set local env vars for DVC pull
+pip install "dvc[s3]"
+export AWS_ACCESS_KEY_ID=<ACCESS_KEY_ID>
+export AWS_SECRET_ACCESS_KEY=<SECRET_KEY>
+
+# install dependencies and pull dataset
 pip install -r requirements-dev.txt
+dvc pull
 
 # Run the pipeline (or `dvc repro` to do the same via DVC)
 python src/validate_data.py
